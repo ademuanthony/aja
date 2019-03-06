@@ -1,0 +1,101 @@
+// Digota <http://digota.com> - eCommerce microservice
+// Copyright (c) 2018 Yaron Sumel <yaron@digota.com>
+//
+// MIT License
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+option go_package = "github.com/digota/digota/product/productpb";
+
+package productpb;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "github.com/digota/digota/sku/skupb/sku.proto";
+
+service ProductService {
+    rpc New (NewRequest) returns (Product) {
+    }
+    rpc Get (GetRequest) returns (Product) {
+    }
+    rpc Update (UpdateRequest) returns (Product) {
+    }
+    rpc List (ListRequest) returns (ProductList) {
+    }
+    rpc Delete (DeleteRequest) returns (Empty) {
+    }
+}
+
+message Empty {}
+
+message Product {
+    string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+    string name = 2;
+    bool active = 3;
+    repeated string attributes = 4 ;
+    string description = 5 ;
+    repeated string images = 6 ;
+    map<string, string> metadata = 7 ;
+    bool shippable = 8 ;
+    string url = 9 ;
+    repeated skupb.Sku skus = 10;
+    int64 created = 998 ;
+    int64 updated = 999 ;
+}
+
+message ProductList {
+    repeated Product products = 1;
+    int32 total =2;
+}
+
+message NewRequest {
+    string name = 1 [(gogoproto.moretags) = "validate:\"required,gte=0\""];
+    bool active = 2 [(gogoproto.moretags) = "validate:\"required\""];
+    repeated string attributes = 3 [(gogoproto.moretags) = "validate:\"dive,required\""];
+    string description = 4 [(gogoproto.moretags) = "validate:\"gt=0,lt=2056\""];
+    repeated string images = 5 [(gogoproto.moretags) = "validate:\"dive,url\""];
+    map<string, string> metadata = 6 [(gogoproto.moretags) = "validate:\"\""];
+    bool shippable = 7 [(gogoproto.moretags) = "validate:\"\""];
+    string url = 8 [(gogoproto.moretags) = "validate:\"omitempty,url\""];
+}
+
+message GetRequest {
+    string id = 1 [(gogoproto.moretags) = "validate:\"required,uuid4\""];
+}
+
+message DeleteRequest {
+    string id = 1 [(gogoproto.moretags) = "validate:\"required,uuid4\""];
+}
+
+message UpdateRequest {
+    string id = 1 [(gogoproto.moretags) = "validate:\"required,uuid4\""];
+    string name = 2 [(gogoproto.moretags) = "validate:\"required,gte=4\""];
+    bool active = 3 [(gogoproto.moretags) = "validate:\"omitempty,required\""];
+    repeated string attributes = 4 [(gogoproto.moretags) = "validate:\"dive,required\""];
+    string description = 5 [(gogoproto.moretags) = "validate:\"gt=0,lt=2056\""];
+    repeated string images = 6 [(gogoproto.moretags) = "validate:\"dive,url\""];
+    map<string, string> metadata = 7 [(gogoproto.moretags) = "validate:\"\""];
+    bool shippable = 8 [(gogoproto.moretags) = "validate:\"\""];
+    string url = 9 [(gogoproto.moretags) = "validate:\"omitempty,url\""];
+}
+
+message ListRequest {
+    int64 page = 1;
+    int64 limit = 2;
+}
